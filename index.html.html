@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Ficha Tênis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --verde: #3dba4e;
+    --verde-dark: #2a8f38;
+    --verde-light: #e8f7ea;
+    --preto: #0f0f0f;
+    --cinza1: #1a1a1a;
+    --cinza2: #2c2c2c;
+    --cinza3: #f5f5f5;
+    --texto: #1a1a1a;
+    --subtexto: #777;
+    --borda: #e0e0e0;
+    --branco: #ffffff;
+    --danger: #e53935;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Barlow', sans-serif;
+    background: var(--cinza3);
+    color: var(--texto);
+    overflow-x: hidden;
+  }
+
+  /* ===== TELAS ===== */
+  .tela { display: none; min-height: 100vh; flex-direction: column; }
+  .tela.ativa { display: flex; }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    background: var(--preto);
+    color: var(--branco);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .topbar-back {
+    background: none;
+    border: none;
+    color: var(--verde);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .topbar h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex: 1;
+  }
+
+  .topbar-badge {
+    background: var(--verde);
+    color: var(--branco);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  /* ===== TELA HOME ===== */
+  .home-hero {
+    background: var(--preto);
+    padding: 28px 20px 24px;
+    border-bottom: 3px solid var(--verde);
+  }
+
+  .home-hero h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--branco);
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .home-hero p {
+    color: #aaa;
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .home-hero p span {
+    color: var(--verde);
+    font-weight: 600;
+  }
+
+  .busca-wrap {
+    padding: 16px 20px 8px;
+  }
+
+  .busca-wrap input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Barlow', sans-serif;
+    background: var(--branco);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .busca-wrap input:focus { border-color: var(--verde); }
+
+  .lista-label {
+    padding: 8px 20px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--subtexto);
+  }
+
+  .lista-alunos {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 100px;
+  }
+
+  .aluno-card {
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1.5px solid transparent;
+  }
+
+  .aluno-card:active { transform: scale(0.98); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+  .aluno-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--verde-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--verde-dark);
+    flex-shrink: 0;
+  }
+
+  .aluno-info { flex: 1; min-width: 0; }
+  .aluno-nome { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .aluno-meta { font-size: 12px; color: var(--subtexto); margin-top: 2px; }
+
+  .aluno-seta { color: #ccc; font-size: 18px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--subtexto);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* ===== BTN NOVO ALUNO ===== */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    background: var(--verde);
+    color: var(--branco);
+    border: none;
+    border-radius: 16px;
+    padding: 16px 22px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(61,186,78,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    z-index: 200;
+  }
+
+  .fab:active { transform: scale(0.96); }
+
+  /* ===== TELA FICHA ===== */
+  .ficha-scroll { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+
+  .secao {
+    background: var(--branco);
+    margin: 12px 16px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .secao-header {
+    background: var(--preto);
+    padding: 12px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--verde);
+    border-left: 4px solid var(--verde);
+  }
+
+  .campo-row {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .campo-row:last-child { border-bottom: none; }
+
+  .campo-row label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--subtexto);
+    margin-bottom: 6px;
+  }
+
+  .campo-row input[type="text"],
+  .campo-row input[type="number"],
+  .campo-row input[type="url"],
+  .campo-row textarea {
+    width: 100%;
+    border: 1.5px solid var(--borda);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: 'Barlow', sans-serif;
+    color: var(--texto);
+    background: var(--cinza3);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .campo-row input:focus,
+  .campo-row textarea:focus { border-color: var(--verde); background: var(--branco); }
+
+  .campo-row textarea { resize: none; min-height: 80px; line-height: 1.5; }
+
+  /* Radio sim/nao */
+  .radio-wrap {
+    display: flex;
+    gap: 10px;
+  }
+
+  .radio-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid var(--borda);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--subtexto);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .radio-btn.ativo-sim {
+    border-color: var(--verde);
+    background: var(--verde-light);
+    color: var(--verde-dark);
+  }
+
+  .radio-btn.ativo-nao {
+    border-color: var(--danger);
+    background: #fdecea;
+    color: var(--danger);
+  }
+
+  /* Indicadores */
+  .indicadores-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .indicador-item {
+    padding: 14px 12px;
+    border-right: 1px solid #f0f0f0;
+    text-align: center;
+  }
+
+  .indicador-item:last-child { border-right: none; }
+
+  .indicador-item label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--subtexto);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .indicador-tipo {
+    font-size: 9px;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .indicador-item input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--borda);
+    padding: 6px 4px;
+    font-size: 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: var(--verde-dark);
+    background: transparent;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .indicador-item input:focus { border-bottom-color: var(--verde); }
+
+  /* Critérios */
+  .golpe-titulo {
+    padding: 10px 16px;
+    background: var(--cinza2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--branco);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .golpe-titulo .cols {
+    display: flex;
+    gap: 20px;
+    font-size: 10px;
+    color: #888;
+    font-weight: 600;
+  }
+
+  .criterio-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 12px;
+  }
+
+  .criterio-item:last-child { border-bottom: none; }
+
+  .criterio-nome {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--texto);
+    line-height: 1.3;
+  }
+
+  .criterio-radios {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .crit-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--borda);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--subtexto);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .crit-btn.sim { border-color: var(--verde); background: var(--verde); color: var(--branco); }
+  .crit-btn.nao { border-color: var(--danger); background: var(--danger); color: var(--branco); }
+
+  /* Videos */
+  .video-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .video-item:last-child { border-bottom: none; }
+
+  .video-item label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--subtexto);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .video-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid var(--borda);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--cinza3);
+    transition: border-color 0.2s;
+  }
+
+  .video-input-wrap:focus-within { border-color: var(--verde); background: var(--branco); }
+
+  .video-icon {
+    padding: 10px 12px;
+    background: #eee;
+    border-right: 1px solid var(--borda);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .video-input-wrap input {
+    flex: 1;
+    border: none;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: 'Barlow', sans-serif;
+    background: transparent;
+    color: var(--texto);
+    outline: none;
+    min-width: 0;
+  }
+
+  /* ===== BARRA AÇÕES ===== */
+  .barra-acoes {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--branco);
+    border-top: 1px solid var(--borda);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    z-index: 200;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+  }
+
+  .btn-salvar {
+    flex: 1;
+    background: var(--verde);
+    color: var(--branco);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-salvar:active { background: var(--verde-dark); }
+
+  .btn-excluir {
+    background: #fdecea;
+    color: var(--danger);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-excluir:active { background: #f9c8c6; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--preto);
+    color: var(--branco);
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 300;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.verde { background: var(--verde); }
+
+  /* ===== MODAL CONFIRMAÇÃO ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 400;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .overlay.ativo { display: flex; }
+
+  .modal {
+    background: var(--branco);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 20px 40px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .modal h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .modal p { font-size: 14px; color: var(--subtexto); margin-bottom: 24px; }
+
+  .modal-btns { display: flex; gap: 10px; }
+
+  .modal-btns button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-cancelar { background: var(--cinza3); color: var(--texto); }
+  .btn-confirmar-excluir { background: var(--danger); color: var(--branco); }
+</style>
+</head>
+<body>
+
+<!-- ===== TELA HOME ===== -->
+<div class="tela ativa" id="tela-home">
+  <div class="home-hero">
+    <h2>FICHA TÉCNICA</h2>
+    <p>Tênis · <span id="total-alunos">0 alunos</span></p>
+  </div>
+
+  <div class="busca-wrap">
+    <input type="text" id="campo-busca" placeholder="🔍  Buscar aluno..." oninput="filtrarAlunos()">
+  </div>
+
+  <div class="lista-label">Alunos</div>
+
+  <div class="lista-alunos" id="lista-alunos">
+    <div class="empty-state" id="empty-state">
+      <div class="icon">🎾</div>
+      <p>Nenhum aluno cadastrado ainda.<br>Toque em <strong>+ Novo Aluno</strong> para começar.</p>
+    </div>
+  </div>
+
+  <button class="fab" onclick="novoAluno()">
+    <span>+</span> Novo Aluno
+  </button>
+</div>
+
+<!-- ===== TELA FICHA ===== -->
+<div class="tela" id="tela-ficha">
+  <div class="topbar">
+    <button class="topbar-back" onclick="voltarHome()">‹</button>
+    <h1 id="topbar-nome">Novo Aluno</h1>
+  </div>
+
+  <div class="ficha-scroll">
+
+    <!-- DADOS PESSOAIS -->
+    <div class="secao" style="margin-top:16px;">
+      <div class="secao-header">Dados Pessoais</div>
+      <div class="campo-row">
+        <label>Nome completo</label>
+        <input type="text" id="f-nome" placeholder="Nome do aluno" oninput="atualizarTopbar()">
+      </div>
+      <div class="campo-row">
+        <label>Idade</label>
+        <input type="number" id="f-idade" placeholder="Ex: 32" min="3" max="99">
+      </div>
+      <div class="campo-row">
+        <label>Objetivo</label>
+        <input type="text" id="f-objetivo" placeholder="Ex: Competição, lazer, condicionamento...">
+      </div>
+      <div class="campo-row">
+        <label>Tempo praticando tênis</label>
+        <input type="text" id="f-tempo" placeholder="Ex: 6 meses, 2 anos...">
+      </div>
+      <div class="campo-row">
+        <label>Está apto fisicamente?</label>
+        <div class="radio-wrap">
+          <div class="radio-btn" id="apto-sim" onclick="toggleRadio('apto','sim')">✓ Sim</div>
+          <div class="radio-btn" id="apto-nao" onclick="toggleRadio('apto','nao')">✗ Não</div>
+        </div>
+      </div>
+      <div class="campo-row">
+        <label>Sente dores ao jogar?</label>
+        <div class="radio-wrap">
+          <div class="radio-btn" id="dores-sim" onclick="toggleRadio('dores','sim')">✓ Sim</div>
+          <div class="radio-btn" id="dores-nao" onclick="toggleRadio('dores','nao')">✗ Não</div>
+        </div>
+      </div>
+      <div class="campo-row" id="campo-dores-desc" style="display:none;">
+        <label>Descreva as dores</label>
+        <textarea id="f-dores-desc" placeholder="Localização, intensidade, quando ocorre..."></textarea>
+      </div>
+    </div>
+
+    <!-- INDICADORES DE DESEMPENHO -->
+    <div class="secao">
+      <div class="secao-header">Indicadores de Desempenho</div>
+      <div class="indicadores-row">
+        <div class="indicador-item">
+          <label>Velocidade</label>
+          <div class="indicador-tipo">tempo</div>
+          <input type="text" id="f-velocidade" placeholder="00:00">
+        </div>
+        <div class="indicador-item">
+          <label>Resistência</label>
+          <div class="indicador-tipo">tempo</div>
+          <input type="text" id="f-resistencia" placeholder="00:00">
+        </div>
+        <div class="indicador-item">
+          <label>Regularidade</label>
+          <div class="indicador-tipo">qtd</div>
+          <input type="text" id="f-regularidade" placeholder="42">
+        </div>
+      </div>
+    </div>
+
+    <!-- CRITÉRIOS TÉCNICOS -->
+    <div class="secao">
+      <div class="secao-header">Indicadores Técnicos</div>
+
+      <!-- FOREHAND -->
+      <div class="golpe-titulo">
+        Forehand
+        <div class="cols"><span>S</span><span>N</span></div>
+      </div>
+      <div id="criterios-forehand"></div>
+
+      <!-- BACKHAND -->
+      <div class="golpe-titulo">
+        Backhand
+        <div class="cols"><span>S</span><span>N</span></div>
+      </div>
+      <div id="criterios-backhand"></div>
+
+      <!-- SAQUE -->
+      <div class="golpe-titulo">
+        Saque
+        <div class="cols"><span>S</span><span>N</span></div>
+      </div>
+      <div id="criterios-saque"></div>
+
+      <!-- VOLEIO -->
+      <div class="golpe-titulo">
+        Voleio
+        <div class="cols"><span>S</span><span>N</span></div>
+      </div>
+      <div id="criterios-voleio"></div>
+
+      <!-- SMASH -->
+      <div class="golpe-titulo">
+        Smash
+        <div class="cols"><span>S</span><span>N</span></div>
+      </div>
+      <div id="criterios-smash"></div>
+
+      <div class="campo-row">
+        <label>Observações técnicas</label>
+        <textarea id="f-obs" placeholder="Anotações livres sobre técnica, evolução..."></textarea>
+      </div>
+    </div>
+
+    <!-- VÍDEOS -->
+    <div class="secao">
+      <div class="secao-header">Links de Vídeos</div>
+      <div class="video-item">
+        <label>Forehand</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-forehand" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="video-item">
+        <label>Backhand</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-backhand" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="video-item">
+        <label>Voleio</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-voleio" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="video-item">
+        <label>Smash</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-smash" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="video-item">
+        <label>Saque</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-saque" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="video-item">
+        <label>Troca de bola fundo</label>
+        <div class="video-input-wrap">
+          <div class="video-icon">▶</div>
+          <input type="url" id="v-troca" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+    </div>
+
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- BARRA AÇÕES -->
+  <div class="barra-acoes">
+    <button class="btn-salvar" onclick="salvarAluno()">💾 Salvar ficha</button>
+    <button class="btn-excluir" id="btn-excluir" onclick="confirmarExcluir()" style="display:none;">🗑</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL EXCLUIR -->
+<div class="overlay" id="overlay-excluir" onclick="fecharModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Excluir aluno?</h3>
+    <p id="modal-nome-aluno">Esta ação não pode ser desfeita.</p>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-confirmar-excluir" onclick="excluirAluno()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DADOS =====
+const CRITERIOS = {
+  forehand: [
+    'Sequência de pré-extensão',
+    'Transferência de peso no contato',
+    'Contato na ascendente',
+    'Preparação encurtada',
+    'Top spin'
+  ],
+  backhand: [
+    'Sequência de pré-extensão',
+    'Transferência de peso no contato',
+    'Contato na ascendente',
+    'Preparação encurtada',
+    'Slice'
+  ],
+  saque: [
+    'Estar definido foot back/foot up',
+    'Cadeia sinética',
+    'Slice',
+    'Pronação',
+    'Drive leg'
+  ],
+  voleio: [
+    'Posição inicial V de voleio',
+    'Empunhadura continental',
+    'Usar apenas 1 das mãos',
+    'Técnica dos pés (volear à frente do corpo)',
+    'Preparação curta'
+  ],
+  smash: [
+    'Técnica de perna',
+    'Swing volley',
+    'Voleio com slice',
+    'Voleio baixo',
+    'Drop volley'
+  ]
+};
+
+let alunos = JSON.parse(localStorage.getItem('tenis_alunos') || '[]');
+let alunoAtualId = null;
+let radios = {}; // estado dos radio buttons
+
+// ===== INICIALIZAÇÃO =====
+function init() {
+  renderizarCriterios();
+  renderizarLista();
+}
+
+function renderizarCriterios() {
+  Object.entries(CRITERIOS).forEach(([golpe, itens]) => {
+    const container = document.getElementById(`criterios-${golpe}`);
+    container.innerHTML = itens.map((nome, i) => `
+      <div class="criterio-item">
+        <div class="criterio-nome">${nome}</div>
+        <div class="criterio-radios">
+          <div class="crit-btn" id="crit-${golpe}-${i}-sim" onclick="toggleCrit('${golpe}',${i},'sim')">S</div>
+          <div class="crit-btn" id="crit-${golpe}-${i}-nao" onclick="toggleCrit('${golpe}',${i},'nao')">N</div>
+        </div>
+      </div>
+    `).join('');
+  });
+}
+
+// ===== LISTA =====
+function renderizarLista(filtro = '') {
+  const lista = document.getElementById('lista-alunos');
+  const empty = document.getElementById('empty-state');
+  const total = document.getElementById('total-alunos');
+
+  const filtrado = alunos.filter(a =>
+    a.nome.toLowerCase().includes(filtro.toLowerCase())
+  ).sort((a, b) => a.nome.localeCompare(b.nome));
+
+  total.textContent = `${alunos.length} aluno${alunos.length !== 1 ? 's' : ''}`;
+
+  if (alunos.length === 0) {
+    empty.style.display = 'block';
+    lista.innerHTML = '';
+    lista.appendChild(empty);
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  lista.innerHTML = filtrado.length === 0
+    ? `<div class="empty-state"><div class="icon">🔍</div><p>Nenhum aluno encontrado.</p></div>`
+    : filtrado.map(a => `
+      <div class="aluno-card" onclick="abrirAluno('${a.id}')">
+        <div class="aluno-avatar">${iniciais(a.nome)}</div>
+        <div class="aluno-info">
+          <div class="aluno-nome">${a.nome || 'Sem nome'}</div>
+          <div class="aluno-meta">${a.idade ? a.idade + ' anos' : '—'} · ${a.objetivo || 'Objetivo não definido'}</div>
+        </div>
+        <div class="aluno-seta">›</div>
+      </div>
+    `).join('');
+}
+
+function filtrarAlunos() {
+  renderizarLista(document.getElementById('campo-busca').value);
+}
+
+function iniciais(nome) {
+  if (!nome) return '?';
+  return nome.trim().split(' ').slice(0, 2).map(p => p[0].toUpperCase()).join('');
+}
+
+// ===== NAVEGAÇÃO =====
+function novoAluno() {
+  alunoAtualId = null;
+  limparFormulario();
+  document.getElementById('topbar-nome').textContent = 'Novo Aluno';
+  document.getElementById('btn-excluir').style.display = 'none';
+  mostrarTela('tela-ficha');
+}
+
+function abrirAluno(id) {
+  const aluno = alunos.find(a => a.id === id);
+  if (!aluno) return;
+  alunoAtualId = id;
+  preencherFormulario(aluno);
+  document.getElementById('topbar-nome').textContent = aluno.nome || 'Sem nome';
+  document.getElementById('btn-excluir').style.display = 'flex';
+  mostrarTela('tela-ficha');
+}
+
+function voltarHome() {
+  mostrarTela('tela-home');
+  renderizarLista(document.getElementById('campo-busca').value);
+}
+
+function mostrarTela(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  document.getElementById(id).classList.add('ativa');
+  window.scrollTo(0, 0);
+}
+
+// ===== FORMULÁRIO =====
+function limparFormulario() {
+  ['f-nome','f-idade','f-objetivo','f-tempo','f-dores-desc','f-velocidade','f-resistencia','f-regularidade','f-obs',
+   'v-forehand','v-backhand','v-voleio','v-smash','v-saque','v-troca'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  radios = {};
+  ['apto-sim','apto-nao','dores-sim','dores-nao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = 'radio-btn';
+  });
+
+  document.getElementById('campo-dores-desc').style.display = 'none';
+
+  Object.keys(CRITERIOS).forEach(golpe => {
+    CRITERIOS[golpe].forEach((_, i) => {
+      const s = document.getElementById(`crit-${golpe}-${i}-sim`);
+      const n = document.getElementById(`crit-${golpe}-${i}-nao`);
+      if (s) s.className = 'crit-btn';
+      if (n) n.className = 'crit-btn';
+    });
+  });
+}
+
+function preencherFormulario(a) {
+  limparFormulario();
+  document.getElementById('f-nome').value = a.nome || '';
+  document.getElementById('f-idade').value = a.idade || '';
+  document.getElementById('f-objetivo').value = a.objetivo || '';
+  document.getElementById('f-tempo').value = a.tempo || '';
+  document.getElementById('f-dores-desc').value = a.doresDesc || '';
+  document.getElementById('f-velocidade').value = a.velocidade || '';
+  document.getElementById('f-resistencia').value = a.resistencia || '';
+  document.getElementById('f-regularidade').value = a.regularidade || '';
+  document.getElementById('f-obs').value = a.obs || '';
+  document.getElementById('v-forehand').value = a.vForehand || '';
+  document.getElementById('v-backhand').value = a.vBackhand || '';
+  document.getElementById('v-voleio').value = a.vVoleio || '';
+  document.getElementById('v-smash').value = a.vSmash || '';
+  document.getElementById('v-saque').value = a.vSaque || '';
+  document.getElementById('v-troca').value = a.vTroca || '';
+
+  if (a.apto) setRadio('apto', a.apto);
+  if (a.dores) {
+    setRadio('dores', a.dores);
+    document.getElementById('campo-dores-desc').style.display = a.dores === 'sim' ? 'block' : 'none';
+  }
+
+  if (a.criterios) {
+    Object.entries(a.criterios).forEach(([golpe, vals]) => {
+      vals.forEach((val, i) => {
+        if (val) {
+          const btn = document.getElementById(`crit-${golpe}-${i}-${val}`);
+          if (btn) btn.className = `crit-btn ${val}`;
+          if (!radios.criterios) radios.criterios = {};
+          if (!radios.criterios[golpe]) radios.criterios[golpe] = [];
+          radios.criterios[golpe][i] = val;
+        }
+      });
+    });
+  }
+}
+
+function atualizarTopbar() {
+  const nome = document.getElementById('f-nome').value;
+  document.getElementById('topbar-nome').textContent = nome || 'Novo Aluno';
+}
+
+// ===== RADIO BUTTONS =====
+function setRadio(grupo, val) {
+  radios[grupo] = val;
+  const sim = document.getElementById(`${grupo}-sim`);
+  const nao = document.getElementById(`${grupo}-nao`);
+  if (sim) sim.className = `radio-btn${val === 'sim' ? ' ativo-sim' : ''}`;
+  if (nao) nao.className = `radio-btn${val === 'nao' ? ' ativo-nao' : ''}`;
+}
+
+function toggleRadio(grupo, val) {
+  setRadio(grupo, val);
+  if (grupo === 'dores') {
+    document.getElementById('campo-dores-desc').style.display = val === 'sim' ? 'block' : 'none';
+  }
+}
+
+function toggleCrit(golpe, idx, val) {
+  if (!radios.criterios) radios.criterios = {};
+  if (!radios.criterios[golpe]) radios.criterios[golpe] = [];
+
+  const atual = radios.criterios[golpe][idx];
+  const novoVal = atual === val ? null : val;
+  radios.criterios[golpe][idx] = novoVal;
+
+  const s = document.getElementById(`crit-${golpe}-${idx}-sim`);
+  const n = document.getElementById(`crit-${golpe}-${idx}-nao`);
+  s.className = `crit-btn${novoVal === 'sim' ? ' sim' : ''}`;
+  n.className = `crit-btn${novoVal === 'nao' ? ' nao' : ''}`;
+}
+
+// ===== SALVAR =====
+function salvarAluno() {
+  const nome = document.getElementById('f-nome').value.trim();
+  if (!nome) { mostrarToast('⚠️ Informe o nome do aluno'); return; }
+
+  const criteriosData = {};
+  Object.keys(CRITERIOS).forEach(golpe => {
+    criteriosData[golpe] = CRITERIOS[golpe].map((_, i) =>
+      radios.criterios?.[golpe]?.[i] || null
+    );
+  });
+
+  const dados = {
+    id: alunoAtualId || `a_${Date.now()}`,
+    nome,
+    idade: document.getElementById('f-idade').value,
+    objetivo: document.getElementById('f-objetivo').value,
+    tempo: document.getElementById('f-tempo').value,
+    apto: radios.apto || null,
+    dores: radios.dores || null,
+    doresDesc: document.getElementById('f-dores-desc').value,
+    velocidade: document.getElementById('f-velocidade').value,
+    resistencia: document.getElementById('f-resistencia').value,
+    regularidade: document.getElementById('f-regularidade').value,
+    criterios: criteriosData,
+    obs: document.getElementById('f-obs').value,
+    vForehand: document.getElementById('v-forehand').value,
+    vBackhand: document.getElementById('v-backhand').value,
+    vVoleio: document.getElementById('v-voleio').value,
+    vSmash: document.getElementById('v-smash').value,
+    vSaque: document.getElementById('v-saque').value,
+    vTroca: document.getElementById('v-troca').value,
+    atualizadoEm: new Date().toISOString()
+  };
+
+  if (alunoAtualId) {
+    alunos = alunos.map(a => a.id === alunoAtualId ? dados : a);
+  } else {
+    alunos.push(dados);
+    alunoAtualId = dados.id;
+  }
+
+  localStorage.setItem('tenis_alunos', JSON.stringify(alunos));
+  document.getElementById('topbar-nome').textContent = nome;
+  document.getElementById('btn-excluir').style.display = 'flex';
+  mostrarToast('✅ Ficha salva!', 'verde');
+}
+
+// ===== EXCLUIR =====
+function confirmarExcluir() {
+  const aluno = alunos.find(a => a.id === alunoAtualId);
+  document.getElementById('modal-nome-aluno').textContent =
+    `Tem certeza que deseja excluir a ficha de ${aluno?.nome || 'este aluno'}? Esta ação não pode ser desfeita.`;
+  document.getElementById('overlay-excluir').classList.add('ativo');
+}
+
+function fecharModal() {
+  document.getElementById('overlay-excluir').classList.remove('ativo');
+}
+
+function excluirAluno() {
+  alunos = alunos.filter(a => a.id !== alunoAtualId);
+  localStorage.setItem('tenis_alunos', JSON.stringify(alunos));
+  fecharModal();
+  mostrarToast('🗑 Aluno excluído');
+  voltarHome();
+}
+
+// ===== TOAST =====
+function mostrarToast(msg, tipo = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${tipo} show`;
+  setTimeout(() => t.className = `toast ${tipo}`, 2500);
+}
+
+// ===== START =====
+init();
+</script>
+</body>
+</html>
